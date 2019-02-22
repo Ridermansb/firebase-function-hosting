@@ -46,7 +46,7 @@ const validateFirebaseIdToken = (req, res, next) => {
     .auth()
     .verifyIdToken(idToken)
     .then(decodedIdToken => {
-      console.log("ID Token correctly decoded", decodedIdToken);
+      console.log("ID Token correctly decoded", req.user);
       req.user = decodedIdToken;
       return next();
     })

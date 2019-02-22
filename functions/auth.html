@@ -18,9 +18,7 @@
       var config = {
         apiKey: "AIzaSyACI6fLf6IfivURRyGzf0Us6xo9gyDOhbM",
         authDomain: "maxmilhas-checkout-hmg.firebaseapp.com",
-        // databaseURL: "//maxmilhas-checkout-hmg.firebaseio.com",
         projectId: "maxmilhas-checkout-hmg",
-        // storageBucket: "maxmilhas-checkout-hmg.appspot.com",
         messagingSenderId: "300463444958",
         clientId:
           "300463444958-i0kn06q4krsc7nbgjlkqnvh44paj4f7a.apps.googleusercontent.com",
@@ -29,7 +27,7 @@
       var app = firebase.initializeApp(config);
 
       var uiConfig = {
-        signInSuccessUrl: "/maxmilhas-checkout-hmg/us-central1/storybook/login",
+        signInSuccessUrl: "/storybook/login",
         signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID]
       };
 
@@ -51,19 +49,31 @@
 
       function handleIdTokenCatch(error) {
         console.error(error);
-        debugger;
       }
 
       function handleIdToken(token) {
-        debugger;
         document.cookie = "__session=" + token + ";max-age=3600";
-        window.location.href = "/maxmilhas-checkout-hmg/us-central1/storybook/";
+        window.location.href = "/storybook/";
         // TODO Redirect
       }
+    </script>
+
+    <script type="module">
+      import { html, render } from "//unpkg.com/lit-html?module";
+
+      // Define a template function
+      const myTemplate = name =>
+        html`
+          <p>Hello ${name}</p>
+        `;
+
+      // Render the template with some data
+      render(myTemplate("lit-html"), document.getElementById("lit"));
     </script>
   </head>
   <body>
     <p>You must authenticate before</p>
     <div id="firebaseui-auth-container"></div>
+    <div id="lit"></div>
   </body>
 </html>

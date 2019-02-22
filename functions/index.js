@@ -9,14 +9,10 @@ admin.initializeApp();
 
 const app = express();
 
-const VERSION = "#7";
-
 app.use(cors);
 app.use(cookieParser);
 
 app.get("/login", function(request, response) {
-  console.log(VERSION, request.url); // TODO Check if is auth, if not redirect to /login
-  //   response.send("Hello Storybook from Firebase! Please Login first");
   response.sendFile(__dirname + "/auth.html");
 });
 
