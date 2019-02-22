@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "storybook-static",
+    "public": "functions/static",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -8,9 +8,11 @@
     ],
     "rewrites": [
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "storybook/**",
+        "function": "storybook"
       }
-    ]
+    ],
+    "cleanUrls": true,
+    "trailingSlash": false
   }
 }
