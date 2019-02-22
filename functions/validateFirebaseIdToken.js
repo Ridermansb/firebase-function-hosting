@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+const admin = require("firebase-admin");
 
 // see https://github.com/firebase/functions-samples/blob/master/authorized-https-endpoint/functions/index.js
 
@@ -41,6 +41,7 @@ const validateFirebaseIdToken = (req, res, next) => {
     res.status(403).send("Unauthorized");
     return;
   }
+
   admin
     .auth()
     .verifyIdToken(idToken)
@@ -55,4 +56,4 @@ const validateFirebaseIdToken = (req, res, next) => {
     });
 };
 
-module.exports = validateFirebaseIdToken
+module.exports = validateFirebaseIdToken;
