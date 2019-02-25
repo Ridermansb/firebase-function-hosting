@@ -8,14 +8,21 @@
 
     <script src="//www.gstatic.com/firebasejs/5.8.4/firebase.js"></script>
     <script src="//www.gstatic.com/firebasejs/ui/3.5.2/firebase-ui-auth__pt_br.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/uikit/3.0.3/js/uikit.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/uikit/3.0.3/css/uikit.min.css"
+    />
     <link
       type="text/css"
       rel="stylesheet"
       href="//www.gstatic.com/firebasejs/ui/3.5.2/firebase-ui-auth.css"
     />
-    <script type="text/javascript">
+    <script type="module">
+      import { html, render } from "//unpkg.com/lit-html?module";
+
       // Initialize Firebase
-      var config = {
+      const config = {
         apiKey: "AIzaSyACI6fLf6IfivURRyGzf0Us6xo9gyDOhbM",
         authDomain: "maxmilhas-checkout-hmg.firebaseapp.com",
         projectId: "maxmilhas-checkout-hmg",
@@ -24,18 +31,14 @@
           "300463444958-i0kn06q4krsc7nbgjlkqnvh44paj4f7a.apps.googleusercontent.com",
         scopes: ["email", "profile"]
       };
-      var app = firebase.initializeApp(config);
-
-      var uiConfig = {
+      const firebaseApp = firebase.initializeApp(config);
+      const uiConfig = {
         signInSuccessUrl: "/storybook/login",
         signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID]
       };
-
-      var auth = app.auth();
-      var ui = new firebaseui.auth.AuthUI(auth);
-      ui.start("#firebaseui-auth-container", uiConfig);
-
-      firebase.auth().onAuthStateChanged(handleAuthStateChanged);
+      let isLoading = true;
+      const auth = firebaseApp.auth();
+      const ui = new firebaseui.auth.AuthUI(auth);
 
       function handleAuthStateChanged(user) {
         if (user) {
@@ -44,36 +47,112 @@
             .currentUser.getIdToken(true)
             .then(handleIdToken)
             .catch(handleIdTokenCatch);
+        } else {
+          document.cookie = undefined;
+        }
+
+        isLoading = false;
+        render(app(user), document.body);
+        if (!user) {
+          ui.start("#firebaseui-auth-container", uiConfig);
         }
       }
-
       function handleIdTokenCatch(error) {
         console.error(error);
       }
-
       function handleIdToken(token) {
         document.cookie = "__session=" + token + ";max-age=3600";
-        window.location.href = "/storybook/";
-        // TODO Redirect
       }
-    </script>
 
-    <script type="module">
-      import { html, render } from "//unpkg.com/lit-html?module";
+      const goToStorybookClickHandler = {
+        handleEvent(e) {
+          e.preventDefault();
+          window.location.href = "/storybook/";
+        },
+        capture: true
+      };
+      const logoutClickHandler = {
+        handleEvent(e) {
+          e.preventDefault();
+          auth.signOut();
+        },
+        capture: true
+      };
 
-      // Define a template function
-      const myTemplate = name =>
+      const renderLoading = () => html`
+        <div class="uk-position-center">
+          <div data-uk-spinner="ratio: 3"></div>
+        </div>
+      `;
+      const renderLoginButton = () => {
+        return html`
+          <div data-uk-alert class="uk-position-relative">
+            <h3>Atenção</h3>
+            <p>
+              Para ter acesso ao Storybook você deve fazer o login com sua conta
+              <strong>MaxMilhas</strong> primeiro.
+            </p>
+            <div id="firebaseui-auth-container"></div>
+          </div>
+        `;
+      };
+      const renderNotMaxMilhasAccount = () => html`
+        <div class="uk-alert-danger" uk-alert>
+          <p>Esta não é uma conta MaxMilhas!</p>
+          Você deve logar usando uma conta da MaxMilhas para ter acesso ao
+          Storybook.
+        </div>
+      `;
+      const renderUserContent = user => {
+        const isMaxMilhasAccount = /\@maxmilhas.com.br$/gi.test(user.email);
+        return html`
+          <div>
+            ${isMaxMilhasAccount ? undefined : renderNotMaxMilhasAccount()}
+            <div class="uk-box-shadow-large uk-padding uk-position-relative">
+              <p class="uk-text-lead uk-margin-remove">
+                <img
+                  class="uk-border-circle"
+                  src=${user.photoURL}
+                  width="60"
+                  height="60"
+                  alt="User"
+                />
+                ${user.displayName}
+                <button uk-close @click=${logoutClickHandler} data-uk-tooltip="Logout">
+                </button>
+              </p>
+
+              <div class="uk-position-top-right uk-position-small">
+                <button
+                  ?disabled=${!isMaxMilhasAccount}
+                  class="uk-button uk-button-primary"
+                  @click=${goToStorybookClickHandler}
+                >
+                  Ir para Storybook
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      };
+      const renderContent = user => html`
+        ${user ? renderUserContent(user) : renderLoginButton()}
+      `;
+
+      const app = user =>
         html`
-          <p>Hello ${name}</p>
+          <div class="uk-section">
+            <div class="uk-container">
+              <h3 class="uk-heading-divider">Storybook Authentication Page</h3>
+              ${isLoading ? renderLoading() : renderContent(user)}
+            </div>
+          </div>
         `;
 
-      // Render the template with some data
-      render(myTemplate("lit-html"), document.getElementById("lit"));
+      render(app(), document.body);
+
+      firebase.auth().onAuthStateChanged(handleAuthStateChanged);
     </script>
   </head>
-  <body>
-    <p>You must authenticate before</p>
-    <div id="firebaseui-auth-container"></div>
-    <div id="lit"></div>
-  </body>
+  <body></body>
 </html>

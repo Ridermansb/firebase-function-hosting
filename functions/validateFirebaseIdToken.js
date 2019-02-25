@@ -46,9 +46,13 @@ const validateFirebaseIdToken = (req, res, next) => {
     .auth()
     .verifyIdToken(idToken)
     .then(decodedIdToken => {
-      console.log("ID Token correctly decoded", req.user);
-      req.user = decodedIdToken;
-      return next();
+      console.log("ID Token correctly decoded", decodedIdToken);
+      if (/\@maxmilhas.com.br$/gi.test(decodedIdToken.email)) {
+        req.user = decodedIdToken;
+        return next();
+      }
+
+      res.status(403).send("Unauthorized");
     })
     .catch(error => {
       console.error("Error while verifying Firebase ID token:", error);
